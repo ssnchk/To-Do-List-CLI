@@ -22,7 +22,7 @@ func (repo JsonTaskRepository) findTaskIndex(tasks []models.Task, taskId int) (i
 		}
 	}
 	if taskIndex == -1 {
-		return 0, fmt.Errorf("Task with Id: %d", taskId)
+		return 0, fmt.Errorf("Couldn't find task with Id: %d", taskId)
 	}
 
 	return taskIndex, nil
@@ -143,6 +143,32 @@ func (repo *JsonTaskRepository) GetAllTasks() (tasks []models.Task, err error) {
 	return tasks, nil
 }
 
+func (repo *JsonTaskRepository) FindTask(taskId int) (task *models.Task, err error) {
+	file, lock, err := repo.loadFile()
+	if err != nil {
+		return
+	}
+	defer func() {
+		closeErr := repo.closeFile(file, lock)
+		if closeErr != nil {
+			err = closeErr
+		}
+	}()
+
+	tasks, err := repo.loadTasks(file)
+	if err != nil {
+		return
+	}
+
+	taskIndex, err := repo.findTaskIndex(tasks, taskId)
+	if err != nil {
+		return
+	}
+	task = &tasks[taskIndex]
+
+	return
+}
+
 func (repo *JsonTaskRepository) DeleteTask(taskId int) (err error) {
 	file, lock, err := repo.loadFile()
 	if err != nil {
@@ -174,7 +200,7 @@ func (repo *JsonTaskRepository) DeleteTask(taskId int) (err error) {
 	return
 }
 
-func (repo *JsonTaskRepository) UpdateTask(task models.Task) error {
+func (repo *JsonTaskRepository) UpdateTask(task *models.Task) error {
 	file, lock, err := repo.loadFile()
 	if err != nil {
 		return err
@@ -196,7 +222,7 @@ func (repo *JsonTaskRepository) UpdateTask(task models.Task) error {
 		return err
 	}
 
-	tasks[taskIndex] = task
+	tasks[taskIndex] = *task
 
 	if err = repo.saveTasks(file, tasks); err != nil {
 		return err

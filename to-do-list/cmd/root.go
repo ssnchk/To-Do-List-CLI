@@ -9,7 +9,6 @@ import (
 var rootCmd = &cobra.Command{
 	Use:   "to-do-list",
 	Short: "A Simple To-Do-List",
-	Long:  `пока что тут нихуя`,
 	//Run: func(cmd *cobra.Command, args []string) { },
 }
 

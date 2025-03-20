@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/spf13/cobra"
 	"log"
 	"to-do-list/internal/config"
@@ -25,6 +26,8 @@ var createCmd = &cobra.Command{
 		if err := repo.AddTask(taskDescription); err != nil {
 			log.Fatalln(err.Error())
 		}
+
+		fmt.Println("Task Created!")
 	},
 }
 
